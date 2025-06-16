@@ -79,5 +79,56 @@ AS
    INSERT INTO dbo.history(ProjectNo,UserName,ModifiedDate,BudgetOld,BudgetNew)
    VALUES(@PNO,SUSER_NAME(),GETDATE(),@old,@new)
    END 
+------------------------------------------
+--5
+USE ITI;
+ALTER TRIGGER dbo.t3 
+ON dbo.department 
+INSTEAD OF insert 
+AS
+BEGIN
+SELECT 'Not allowed'
+END;
+----------------------------------
+--6
+USE Company_SD;
 
- ------------------------------------------
+ALTER TRIGGER t4 
+ON dbo.Employee
+AFTER INSERT 
+AS 
+IF FORMAT(GETDATE(),'MMMM') = 'March'
+BEGIN
+ROLLBACK TRANSACTION
+END; 
+------------------------------
+--7
+
+
+USE ITI;
+CREATE TABLE stud_audit
+(
+Server_User_Name varchar(50),
+Date date ,
+Note varchar(70)
+)
+CREATE TRIGGER t5
+ON dbo.Student 
+AFTER insert 
+AS 
+BEGIN
+INSERT INTO stud_audit(Server_User_Name,Date,Note)
+SELECT USER_NAME(),GETDATE(),USER_NAME()+' insert new Row with key ='+CAST(St_Id AS varchar(50))
+FROM inserted
+END;
+--------------------------------
+--8 
+CREATE TRIGGER t6 
+ON dbo.Student 
+INSTEAD OF DELETE
+AS 
+BEGIN
+INSERT INTO stud_audit(Server_User_Name,Date,Note)
+SELECT USER_NAME(),GETDATE(),USER_NAME()+'try to delete new Row with key ='+CAST(St_Id AS varchar(50))
+FROM DELETED
+END;
